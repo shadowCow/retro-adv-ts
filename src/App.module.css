@@ -3,3 +3,7 @@
   flex-direction: column;
   flex-grow: 1;
 }
+
+.loading {
+  flex-grow: 1;
+}

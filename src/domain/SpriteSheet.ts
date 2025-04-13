@@ -4,6 +4,7 @@ export type SpriteSheet = {
   id: string;
   getCurrentSpriteBounds(): Rect;
   setAnimation(animationId: string): void;
+  stopAnimation(): void;
   update(dt: number): void;
 };
 
@@ -32,7 +33,21 @@ export function createSpriteSheet(
       return spriteMap[_currentSpriteId];
     },
     setAnimation(animationId) {
+      //   console.log('setAnimation', animationId);
+      if (animationId === _animationId) {
+        return;
+      }
+
       _animationId = animationId;
+      _secondsThroughCycle = 0;
+      _currentSpriteId = animations[_animationId].spriteIds[0];
+    },
+    stopAnimation() {
+      if (_animationId !== undefined) {
+        _currentSpriteId = animations[_animationId].spriteIds[0];
+        _animationId = undefined;
+        _secondsThroughCycle = 0;
+      }
     },
     update(dt) {
       if (_animationId === undefined) {

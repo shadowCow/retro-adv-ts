@@ -8,8 +8,9 @@ import {
   ControllerKeys,
   keysToControlActions,
 } from '../../adapters/InputControllerKeyboard';
+import { TextureCache } from '../../domain/TextureCache';
 
-export function GameView(props: {}): JSX.Element {
+export function GameView(props: { textureCache: TextureCache }): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number>(null);
   const lastTimestampRef = useRef<number>(0);
@@ -19,13 +20,13 @@ export function GameView(props: {}): JSX.Element {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      console.log('keydown', e.key);
+      // console.log('keydown', e.key);
       keysRef.current[e.key] = true;
       e.preventDefault();
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       keysRef.current[e.key] = false;
-      console.log('keydown', e.key);
+      // console.log('keydown', e.key);
     };
 
     window.addEventListener('keydown', handleKeyDown, { passive: false });
@@ -62,6 +63,7 @@ export function GameView(props: {}): JSX.Element {
               canvas.offsetWidth,
               canvas.offsetHeight,
               worldRef.current,
+              props.textureCache,
             );
           }
 
