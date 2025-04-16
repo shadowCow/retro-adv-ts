@@ -2,8 +2,16 @@ import { GameEntity } from '../domain/GameEntity';
 import { GameWorld } from '../domain/GameWorld';
 import { GameRenderer } from '../domain/ports/GameRenderer';
 import { TextureCache } from '../domain/TextureCache';
-import { TileGrid } from '../domain/TileGrid';
+import { Tile, TileGrid } from '../domain/TileGrid';
 import { floorTexture1 } from '../domain/TileGrids';
+
+const red = 'red';
+const blue = 'blue';
+const green = 'green';
+const yellow = 'yellow';
+const brown = 'brown';
+const white = 'white';
+const black = 'black';
 
 export function createGameRendererCanvas(
   ctx: CanvasRenderingContext2D,
@@ -20,12 +28,17 @@ export function createGameRendererCanvas(
     ): void {
       accTime += dt;
       // clear
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = black;
       ctx.fillRect(0, 0, viewWidth, viewHeight);
 
       const tileSize = 50;
 
-      drawTileGrid(ctx, tileSize, textureCache, world.currentRoom.tileGrid);
+      drawTileGrid(
+        ctx,
+        tileSize,
+        textureCache,
+        world.rooms[world.currentRoomId].tileGrid,
+      );
       drawPlayer(ctx, tileSize, textureCache, world.player);
     },
   };
@@ -43,15 +56,24 @@ function drawTileGrid(
     for (let r = 0; r < tileGrid.getNumRows(); r++) {
       const tile = tileGrid.getTileAt(c, r);
 
-      const color = tile.textureId === floorTexture1 ? '#000000' : '#ffffff';
-
+      const color = getTileColor(tile);
       const x = c * tileSize;
       const y = r * tileSize;
+
+      // console.log('drawTileGrid', { c, r, x, y, tile, color });
 
       ctx.fillStyle = color;
       ctx.fillRect(x, y, tileSize, tileSize);
     }
   }
+}
+
+function getTileColor(tile: Tile): string {
+  if (tile.portal !== undefined) {
+    return blue;
+  }
+
+  return tile.textureId === floorTexture1 ? black : white;
 }
 
 function drawPlayer(
@@ -60,14 +82,16 @@ function drawPlayer(
   textureCache: TextureCache,
   player: GameEntity,
 ): void {
-  const screenX = player.position.x * tileSize;
-  const screenY = player.position.y * tileSize;
+  const playerBounds = player.getBounds();
+  const screenX = playerBounds.x * tileSize;
+  const screenY = playerBounds.y * tileSize;
   const destWidth = tileSize;
   const destHeight = tileSize;
   //   console.log('drawing player', { tileSize, screenX, screenY });
 
-  const image = textureCache[player.spriteSheet.id];
-  const spriteSourceBounds = player.spriteSheet.getCurrentSpriteBounds();
+  const spriteSheet = player.getSpriteSheet();
+  const image = textureCache[spriteSheet.id];
+  const spriteSourceBounds = spriteSheet.getCurrentSpriteBounds();
   //   console.log('spriteSourceBounds', spriteSourceBounds);
 
   ctx.drawImage(

@@ -9,3 +9,9 @@ export function add(a: Vec2, b: Vec2): Vec2 {
     y: a.y + b.y,
   };
 }
+
+export function euclideanDistance(a: Vec2, b: Vec2): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}

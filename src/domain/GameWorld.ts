@@ -1,40 +1,48 @@
-import { GameEntity } from './GameEntity';
+import { createGameEntity, GameEntity } from './GameEntity';
+import {
+  createRoom1,
+  createRoom2,
+  createRoom3,
+  createRoom4,
+  createRoom5,
+  createRoom6,
+  room1Id,
+  room2Id,
+  room3Id,
+  room4Id,
+  room5Id,
+  room6Id,
+} from './RoomDefinitions';
 import { createPlayerSpriteSheet } from './SpriteSheets';
 import { TileGrid } from './TileGrid';
-import {
-  floorTexture1,
-  floorTexture2,
-  tileGridAlternatingTexture,
-} from './TileGrids';
 
 export type GameWorld = {
   player: GameEntity;
-  currentRoom: Room;
+  rooms: Rooms;
+  currentRoomId: string;
 };
 
-export type RoomGraph = {};
+export type Rooms = Record<string, Room>;
 
 export type Room = {
+  roomId: string;
   tileGrid: TileGrid;
 };
 
 export function createGameWorld(): GameWorld {
+  const player = createGameEntity(3, 1, 1, createPlayerSpriteSheet());
+  player.setPosition(4, 4);
+
   return {
-    player: {
-      speed: 3,
-      position: {
-        x: 4,
-        y: 4,
-      },
-      spriteSheet: createPlayerSpriteSheet(),
+    player,
+    rooms: {
+      [room1Id]: createRoom1(),
+      [room2Id]: createRoom2(),
+      [room3Id]: createRoom3(),
+      [room4Id]: createRoom4(),
+      [room5Id]: createRoom5(),
+      [room6Id]: createRoom6(),
     },
-    currentRoom: {
-      tileGrid: tileGridAlternatingTexture(
-        16,
-        12,
-        floorTexture1,
-        floorTexture2,
-      ),
-    },
+    currentRoomId: room1Id,
   };
 }
