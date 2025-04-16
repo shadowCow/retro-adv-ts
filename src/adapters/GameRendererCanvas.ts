@@ -39,7 +39,8 @@ export function createGameRendererCanvas(
         textureCache,
         world.rooms[world.currentRoomId].tileGrid,
       );
-      drawPlayer(ctx, tileSize, textureCache, world.player);
+      drawEntity(ctx, tileSize, textureCache, world.player);
+      drawEntities(ctx, tileSize, textureCache, world.entities);
     },
   };
 
@@ -76,20 +77,31 @@ function getTileColor(tile: Tile): string {
   return tile.textureId === floorTexture1 ? black : white;
 }
 
-function drawPlayer(
+function drawEntities(
   ctx: CanvasRenderingContext2D,
   tileSize: number,
   textureCache: TextureCache,
-  player: GameEntity,
+  entities: GameEntity[],
+) {
+  entities.forEach((entity) => {
+    drawEntity(ctx, tileSize, textureCache, entity);
+  });
+}
+
+function drawEntity(
+  ctx: CanvasRenderingContext2D,
+  tileSize: number,
+  textureCache: TextureCache,
+  entity: GameEntity,
 ): void {
-  const playerBounds = player.getBounds();
-  const screenX = playerBounds.x * tileSize;
-  const screenY = playerBounds.y * tileSize;
-  const destWidth = tileSize;
-  const destHeight = tileSize;
+  const entityBounds = entity.getBounds();
+  const destX = entityBounds.x * tileSize;
+  const destY = entityBounds.y * tileSize;
+  const destWidth = entityBounds.width * tileSize;
+  const destHeight = entityBounds.height * tileSize;
   //   console.log('drawing player', { tileSize, screenX, screenY });
 
-  const spriteSheet = player.getSpriteSheet();
+  const spriteSheet = entity.getSpriteSheet();
   const image = textureCache[spriteSheet.id];
   const spriteSourceBounds = spriteSheet.getCurrentSpriteBounds();
   //   console.log('spriteSourceBounds', spriteSourceBounds);
@@ -100,8 +112,8 @@ function drawPlayer(
     spriteSourceBounds.y,
     spriteSourceBounds.width,
     spriteSourceBounds.height, // src rect (x, y, w, h) in the sprite
-    screenX,
-    screenY,
+    destX,
+    destY,
     destWidth,
     destHeight, // dest rect (x, y, w, h) on canvas
   );

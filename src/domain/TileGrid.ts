@@ -12,8 +12,18 @@ export type Tile = {
   col: number;
   row: number;
   textureId: string;
+  terrainKind: TerrainKind;
   portal?: Portal;
 };
+
+export const terrainKind = Object.freeze({
+  grass: 'grass',
+  wood: 'wood',
+  dirt: 'dirt',
+  metal: 'metal',
+  water: 'water',
+});
+export type TerrainKind = (typeof terrainKind)[keyof typeof terrainKind];
 
 export function createTileGrid(
   numCols: number,

@@ -1,4 +1,5 @@
 import { createGameEntity, GameEntity } from './GameEntity';
+import { createInventory } from './Inventory';
 import {
   createRoom1,
   createRoom2,
@@ -20,6 +21,7 @@ export type GameWorld = {
   player: GameEntity;
   rooms: Rooms;
   currentRoomId: string;
+  entities: Array<GameEntity>;
 };
 
 export type Rooms = Record<string, Room>;
@@ -30,8 +32,18 @@ export type Room = {
 };
 
 export function createGameWorld(): GameWorld {
-  const player = createGameEntity(3, 1, 1, createPlayerSpriteSheet());
+  const player = createGameEntity(
+    3,
+    1,
+    1,
+    createPlayerSpriteSheet(),
+    false,
+    createInventory(),
+  );
   player.setPosition(4, 4);
+
+  const key = createGameEntity(0, 0.25, 0.25, createPlayerSpriteSheet(), true);
+  key.setPosition(1, 1);
 
   return {
     player,
@@ -44,5 +56,6 @@ export function createGameWorld(): GameWorld {
       [room6Id]: createRoom6(),
     },
     currentRoomId: room1Id,
+    entities: [key],
   };
 }

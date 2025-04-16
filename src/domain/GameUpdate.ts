@@ -1,5 +1,5 @@
 import { assertNever } from '@cow-sunday/fp-ts';
-import { ControlAction, Move, move } from './ControlActions';
+import { ControlAction, Move, move, openInventory } from './ControlActions';
 import { GameEntity } from './GameEntity';
 import { GameWorld } from './GameWorld';
 import { Portal, portalTriggerLocation } from './Portal';
@@ -10,7 +10,14 @@ import {
   playerWalkingUp,
 } from './SpriteSheets';
 import { Tile } from './TileGrid';
-import { rectBottom, rectCenter, rectLeft, rectRight, rectTop } from './Rect';
+import {
+  rectBottom,
+  rectCenter,
+  rectIntersect,
+  rectLeft,
+  rectRight,
+  rectTop,
+} from './Rect';
 import { euclideanDistance } from './Vec2';
 
 export function gameUpdate(
@@ -18,16 +25,6 @@ export function gameUpdate(
   world: GameWorld,
   actions: Array<ControlAction>,
 ) {
-  applyActions(dt, world, actions);
-
-  updateSpriteSheets(dt, world);
-}
-
-function applyActions(
-  dt: number,
-  world: GameWorld,
-  actions: Array<ControlAction>,
-): void {
   let playerIsMoving = false;
   actions.forEach((action) => {
     switch (action.kind) {
@@ -35,14 +32,25 @@ function applyActions(
         movePlayer(dt, world.player, action);
         playerIsMoving = true;
         break;
+      case openInventory.kind:
+        // ???
+        break;
+      default:
+        assertNever(action);
     }
   });
+
+  moveEntities(dt, world);
+  resolvePlayerCollisions(world);
+  removeDestroyedEntities(world);
 
   const changedRoom = maybeChangeRooms(world);
 
   if (!playerIsMoving || changedRoom) {
     world.player.getSpriteSheet().stopAnimation();
   }
+
+  updateSpriteSheets(dt, world);
 }
 
 function movePlayer(dt: number, player: GameEntity, action: Move): void {
@@ -64,9 +72,31 @@ function movePlayer(dt: number, player: GameEntity, action: Move): void {
   }
 }
 
+function moveEntities(dt: number, world: GameWorld): void {
+  world.entities.forEach((entity) => {
+    entity.moveByVelocity(dt);
+  });
+}
+
+function resolvePlayerCollisions(world: GameWorld): void {
+  // TODO - handle collisions with impassable terrain.
+
+  world.entities.forEach((entity) => {
+    if (entity.isCollectible()) {
+      if (rectIntersect(world.player.getBounds(), entity.getBounds())) {
+        const inventory = world.player.getInventory();
+
+        if (inventory !== undefined) {
+          inventory.addItem(entity);
+          entity.setIsDestroyed(true);
+        }
+      }
+    }
+  });
+}
+
 function maybeChangeRooms(world: GameWorld): boolean {
   const portal = findTriggeredPortal(world);
-  console.log('portal', JSON.stringify(portal));
   if (portal === undefined) {
     return false;
   }
@@ -120,4 +150,8 @@ function isPortalCollided(tile: Tile, entity: GameEntity): boolean {
 
 function updateSpriteSheets(dt: number, world: GameWorld): void {
   world.player.getSpriteSheet().update(dt);
+}
+
+function removeDestroyedEntities(world: GameWorld) {
+  world.entities = world.entities.filter((x) => !x.isDestroyed());
 }

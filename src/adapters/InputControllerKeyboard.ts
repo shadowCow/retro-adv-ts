@@ -1,4 +1,4 @@
-import { ControlAction, move } from '../domain/ControlActions';
+import { ControlAction, move, openInventory } from '../domain/ControlActions';
 
 export type ControllerKeys = Record<string, boolean>;
 
@@ -11,34 +11,53 @@ const keyNames = Object.freeze({
   d: 'd',
   s: 's',
   w: 'w',
+  i: 'i',
 });
+type KeyName = (typeof keyNames)[keyof typeof keyNames];
 
-export function keysToControlActions(
-  keys: ControllerKeys,
-): Array<ControlAction> {
-  const actions: Array<ControlAction> = [];
+export type InputControllerKeyboard = {
+  keysToControlActions(keys: ControllerKeys): Array<ControlAction>;
+};
 
-  let dx = 0;
-  let dy = 0;
+export function createInputControllerKeyboard(): InputControllerKeyboard {
+  let previousKeys: ControllerKeys = {};
 
-  if (isMovingLeft(keys) && !isMovingRight(keys)) {
-    dx = -1;
-  }
-  if (isMovingRight(keys) && !isMovingLeft(keys)) {
-    dx = 1;
-  }
-  if (isMovingUp(keys) && !isMovingDown(keys)) {
-    dy = -1;
-  }
-  if (isMovingDown(keys) && !isMovingUp(keys)) {
-    dy = 1;
-  }
+  const inputController: InputControllerKeyboard = {
+    keysToControlActions: function (
+      keys: ControllerKeys,
+    ): Array<ControlAction> {
+      const actions: Array<ControlAction> = [];
 
-  if (dx !== 0 || dy !== 0) {
-    actions.push(move({ dx, dy }));
-  }
+      let dx = 0;
+      let dy = 0;
 
-  return actions;
+      if (isMovingLeft(keys) && !isMovingRight(keys)) {
+        dx = -1;
+      }
+      if (isMovingRight(keys) && !isMovingLeft(keys)) {
+        dx = 1;
+      }
+      if (isMovingUp(keys) && !isMovingDown(keys)) {
+        dy = -1;
+      }
+      if (isMovingDown(keys) && !isMovingUp(keys)) {
+        dy = 1;
+      }
+
+      if (dx !== 0 || dy !== 0) {
+        actions.push(move({ dx, dy }));
+      }
+
+      if (wasPressed(previousKeys, keys, keyNames.i)) {
+        actions.push(openInventory());
+      }
+
+      previousKeys = keys;
+      return actions;
+    },
+  };
+
+  return inputController;
 }
 
 function isMovingLeft(keys: ControllerKeys): boolean {
@@ -55,4 +74,12 @@ function isMovingUp(keys: ControllerKeys): boolean {
 
 function isMovingDown(keys: ControllerKeys): boolean {
   return keys[keyNames.ArrowDown] || keys[keyNames.s];
+}
+
+function wasPressed(
+  previous: ControllerKeys,
+  current: ControllerKeys,
+  keyName: KeyName,
+): boolean {
+  return !previous[keyName] && current[keyName];
 }

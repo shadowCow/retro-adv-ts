@@ -1,4 +1,4 @@
-import { createTileGrid, Tile, TileGrid } from './TileGrid';
+import { createTileGrid, terrainKind, Tile, TileGrid } from './TileGrid';
 
 export const floorTexture1 = 'floorTexture1';
 export const floorTexture2 = 'floorTexture2';
@@ -70,6 +70,7 @@ export function tileGridCyclicTexture(
       col: i % numCols,
       row: Math.floor(i / numCols),
       textureId: textureIds[textureIdIndex],
+      terrainKind: terrainKind.grass,
     };
 
     textureIdIndex += 1;

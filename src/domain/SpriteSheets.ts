@@ -64,3 +64,26 @@ export function createPlayerSpriteSheet(): SpriteSheet {
     animations,
   );
 }
+
+export function createKeySpriteSheet(): SpriteSheet {
+  const spriteSize = 16;
+  const spriteMap: SpriteMap = {
+    [playerWalkDown1]: { x: 0, y: 0, width: spriteSize, height: spriteSize },
+    [playerWalkDown2]: { x: 0, y: 30, width: spriteSize, height: spriteSize },
+    [playerWalkLeft1]: { x: 30, y: 0, width: spriteSize, height: spriteSize },
+    [playerWalkLeft2]: { x: 30, y: 30, width: spriteSize, height: spriteSize },
+    [playerWalkUp1]: { x: 60, y: 0, width: spriteSize, height: spriteSize },
+    [playerWalkUp2]: { x: 60, y: 30, width: spriteSize, height: spriteSize },
+    [playerWalkRight1]: { x: 90, y: 0, width: spriteSize, height: spriteSize },
+    [playerWalkRight2]: { x: 90, y: 30, width: spriteSize, height: spriteSize },
+  };
+
+  const animations: AnimationMap = {};
+
+  return createSpriteSheet(
+    playerSpriteSheetId,
+    playerWalkUp1,
+    spriteMap,
+    animations,
+  );
+}

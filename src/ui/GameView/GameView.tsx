@@ -6,11 +6,14 @@ import { createGameWorld, GameWorld } from '../../domain/GameWorld';
 import { gameUpdate } from '../../domain/GameUpdate';
 import {
   ControllerKeys,
-  keysToControlActions,
+  InputControllerKeyboard,
 } from '../../adapters/InputControllerKeyboard';
 import { TextureCache } from '../../domain/TextureCache';
 
-export function GameView(props: { textureCache: TextureCache }): JSX.Element {
+export function GameView(props: {
+  textureCache: TextureCache;
+  inputControllerKeyboard: InputControllerKeyboard;
+}): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number>(null);
   const lastTimestampRef = useRef<number>(0);
@@ -54,7 +57,9 @@ export function GameView(props: { textureCache: TextureCache }): JSX.Element {
 
           lastTimestampRef.current = time;
 
-          const actions = keysToControlActions(keysRef.current);
+          const actions = props.inputControllerKeyboard.keysToControlActions(
+            keysRef.current,
+          );
           gameUpdate(dt, worldRef.current, actions);
 
           if (gameRendererRef.current !== null) {

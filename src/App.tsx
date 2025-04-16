@@ -3,6 +3,7 @@ import classes from './App.module.css';
 import { GameView } from './ui/GameView/GameView';
 import { loadTextures } from './adapters/Textures';
 import { TextureCache } from './domain/TextureCache';
+import { createInputControllerKeyboard } from './adapters/InputControllerKeyboard';
 
 function App() {
   const [textureCache, setTextureCache] = useState<TextureCache>();
@@ -17,7 +18,10 @@ function App() {
   if (textureCache) {
     return (
       <div className={classes.layout}>
-        <GameView textureCache={textureCache} />
+        <GameView
+          textureCache={textureCache}
+          inputControllerKeyboard={createInputControllerKeyboard()}
+        />
       </div>
     );
   } else {
