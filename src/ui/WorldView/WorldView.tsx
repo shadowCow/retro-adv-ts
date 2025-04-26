@@ -2,14 +2,13 @@ import { JSX, useEffect, useRef } from 'react';
 import { GameRenderer } from '../../domain/ports/GameRenderer';
 import { createGameRendererCanvas } from '../../adapters/GameRendererCanvas';
 import classes from './WorldView.module.css';
-import { createGameWorld, GameWorld } from '../../domain/GameWorld';
+import { GameWorld } from '../../domain/GameWorld';
 import { gameUpdate } from '../../domain/GameUpdate';
 import {
   ControllerKeys,
   InputControllerKeyboard,
 } from '../../adapters/InputControllerKeyboard';
 import { TextureCache } from '../../domain/TextureCache';
-import { OverlayView } from '../OverlayView/OverlayView';
 
 /**
  * WorldView is the canvas container which is responsible for rendering the game world.
@@ -20,15 +19,17 @@ import { OverlayView } from '../OverlayView/OverlayView';
  * @returns
  */
 export function WorldView(props: {
+  world: GameWorld;
   textureCache: TextureCache;
   inputControllerKeyboard: InputControllerKeyboard;
+  onPauseToggled: (v: boolean) => void;
 }): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameIdRef = useRef<number>(null);
   const lastTimestampRef = useRef<number>(0);
   const keysRef = useRef<ControllerKeys>({});
   const gameRendererRef = useRef<GameRenderer>(null);
-  const worldRef = useRef<GameWorld>(createGameWorld());
+  const lastFramePausedRef = useRef<boolean>(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -69,14 +70,18 @@ export function WorldView(props: {
           const actions = props.inputControllerKeyboard.keysToControlActions({
             ...keysRef.current,
           });
-          gameUpdate(dt, worldRef.current, actions);
+          gameUpdate(dt, props.world, actions);
+          if (props.world.isPaused !== lastFramePausedRef.current) {
+            props.onPauseToggled(props.world.isPaused);
+          }
+          lastFramePausedRef.current = props.world.isPaused;
 
-          if (gameRendererRef.current !== null) {
+          if (gameRendererRef.current !== null && !props.world.isPaused) {
             gameRendererRef.current.render(
               dt,
               canvas.offsetWidth,
               canvas.offsetHeight,
-              worldRef.current,
+              props.world,
               props.textureCache,
             );
           }
@@ -106,7 +111,6 @@ export function WorldView(props: {
   return (
     <div className={classes.gameSurface}>
       <canvas ref={canvasRef} id="game-surface"></canvas>
-      <OverlayView isVisible={false} />
     </div>
   );
 }
