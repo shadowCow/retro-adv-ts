@@ -1,7 +1,7 @@
 import { JSX, useEffect, useRef } from 'react';
 import { GameRenderer } from '../../domain/ports/GameRenderer';
 import { createGameRendererCanvas } from '../../adapters/GameRendererCanvas';
-import classes from './GameView.module.css';
+import classes from './WorldView.module.css';
 import { createGameWorld, GameWorld } from '../../domain/GameWorld';
 import { gameUpdate } from '../../domain/GameUpdate';
 import {
@@ -9,8 +9,17 @@ import {
   InputControllerKeyboard,
 } from '../../adapters/InputControllerKeyboard';
 import { TextureCache } from '../../domain/TextureCache';
+import { OverlayView } from '../OverlayView/OverlayView';
 
-export function GameView(props: {
+/**
+ * WorldView is the canvas container which is responsible for rendering the game world.
+ *
+ * It includes logic to handle the game loop and input.
+ *
+ * @param props
+ * @returns
+ */
+export function WorldView(props: {
   textureCache: TextureCache;
   inputControllerKeyboard: InputControllerKeyboard;
 }): JSX.Element {
@@ -23,13 +32,13 @@ export function GameView(props: {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // console.log('keydown', e.key);
+      console.log('keydown', e.key);
       keysRef.current[e.key] = true;
       e.preventDefault();
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       keysRef.current[e.key] = false;
-      // console.log('keydown', e.key);
+      console.log('keyup', e.key);
     };
 
     window.addEventListener('keydown', handleKeyDown, { passive: false });
@@ -57,9 +66,9 @@ export function GameView(props: {
 
           lastTimestampRef.current = time;
 
-          const actions = props.inputControllerKeyboard.keysToControlActions(
-            keysRef.current,
-          );
+          const actions = props.inputControllerKeyboard.keysToControlActions({
+            ...keysRef.current,
+          });
           gameUpdate(dt, worldRef.current, actions);
 
           if (gameRendererRef.current !== null) {
@@ -97,6 +106,7 @@ export function GameView(props: {
   return (
     <div className={classes.gameSurface}>
       <canvas ref={canvasRef} id="game-surface"></canvas>
+      <OverlayView isVisible={false} />
     </div>
   );
 }

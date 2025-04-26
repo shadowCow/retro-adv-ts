@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import classes from './App.module.css';
-import { GameView } from './ui/GameView/GameView';
+import { WorldView } from './ui/WorldView/WorldView';
 import { loadTextures } from './adapters/Textures';
 import { TextureCache } from './domain/TextureCache';
 import { createInputControllerKeyboard } from './adapters/InputControllerKeyboard';
@@ -18,7 +18,7 @@ function App() {
   if (textureCache) {
     return (
       <div className={classes.layout}>
-        <GameView
+        <WorldView
           textureCache={textureCache}
           inputControllerKeyboard={createInputControllerKeyboard()}
         />

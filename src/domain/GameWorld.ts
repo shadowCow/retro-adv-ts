@@ -22,6 +22,7 @@ export type GameWorld = {
   rooms: Rooms;
   currentRoomId: string;
   entities: Array<GameEntity>;
+  isPaused: boolean;
 };
 
 export type Rooms = Record<string, Room>;
@@ -31,7 +32,28 @@ export type Room = {
   tileGrid: TileGrid;
 };
 
+/**
+ * Creates the initial game world state.
+ *
+ * @returns
+ */
 export function createGameWorld(): GameWorld {
+  const world = createEmptyGameWorld();
+
+  const key = createGameEntity(0, 0.25, 0.25, createPlayerSpriteSheet(), true);
+  key.setPosition(1, 1);
+
+  world.entities.push(key);
+
+  return world;
+}
+
+/**
+ * Creates the game world with the real topology, but no entities.
+ *
+ * Does include the player.
+ */
+export function createEmptyGameWorld(): GameWorld {
   const player = createGameEntity(
     3,
     1,
@@ -41,9 +63,6 @@ export function createGameWorld(): GameWorld {
     createInventory(),
   );
   player.setPosition(4, 4);
-
-  const key = createGameEntity(0, 0.25, 0.25, createPlayerSpriteSheet(), true);
-  key.setPosition(1, 1);
 
   return {
     player,
@@ -56,6 +75,7 @@ export function createGameWorld(): GameWorld {
       [room6Id]: createRoom6(),
     },
     currentRoomId: room1Id,
-    entities: [key],
+    entities: [],
+    isPaused: false,
   };
 }

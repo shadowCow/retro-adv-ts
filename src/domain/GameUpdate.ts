@@ -1,5 +1,11 @@
 import { assertNever } from '@cow-sunday/fp-ts';
-import { ControlAction, Move, move, openInventory } from './ControlActions';
+import {
+  ControlAction,
+  Move,
+  move,
+  openInventory,
+  togglePause,
+} from './ControlActions';
 import { GameEntity } from './GameEntity';
 import { GameWorld } from './GameWorld';
 import { Portal, portalTriggerLocation } from './Portal';
@@ -25,12 +31,23 @@ export function gameUpdate(
   world: GameWorld,
   actions: Array<ControlAction>,
 ) {
+  actions
+    .filter((a) => a.kind === togglePause.kind)
+    .map((_) => (world.isPaused = !world.isPaused));
+
+  if (world.isPaused) {
+    return;
+  }
+
   let playerIsMoving = false;
   actions.forEach((action) => {
     switch (action.kind) {
       case move.kind:
         movePlayer(dt, world.player, action);
         playerIsMoving = true;
+        break;
+      case togglePause.kind:
+        // handled above, case is here for exhaustiveness check
         break;
       case openInventory.kind:
         // ???

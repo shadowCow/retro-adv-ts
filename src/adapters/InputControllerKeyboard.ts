@@ -1,4 +1,9 @@
-import { ControlAction, move, openInventory } from '../domain/ControlActions';
+import {
+  ControlAction,
+  move,
+  openInventory,
+  togglePause,
+} from '../domain/ControlActions';
 
 export type ControllerKeys = Record<string, boolean>;
 
@@ -12,6 +17,7 @@ const keyNames = Object.freeze({
   s: 's',
   w: 'w',
   i: 'i',
+  p: 'p',
 });
 type KeyName = (typeof keyNames)[keyof typeof keyNames];
 
@@ -26,6 +32,9 @@ export function createInputControllerKeyboard(): InputControllerKeyboard {
     keysToControlActions: function (
       keys: ControllerKeys,
     ): Array<ControlAction> {
+      if (keys[keyNames.p] || keys[keyNames.i]) {
+        console.log('keys', { keys });
+      }
       const actions: Array<ControlAction> = [];
 
       let dx = 0;
@@ -48,7 +57,11 @@ export function createInputControllerKeyboard(): InputControllerKeyboard {
         actions.push(move({ dx, dy }));
       }
 
-      if (wasPressed(previousKeys, keys, keyNames.i)) {
+      if (wasPressed(previousKeys, keys, keyNames.p)) {
+        console.log('pressed p');
+        actions.push(togglePause());
+      } else if (wasPressed(previousKeys, keys, keyNames.i)) {
+        console.log('pressed i');
         actions.push(openInventory());
       }
 

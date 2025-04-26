@@ -1,6 +1,7 @@
 import test, { suite } from 'node:test';
 import { tileGridCyclicTexture } from './TileGrids';
 import assert from 'node:assert';
+import { terrainKind } from './TileGrid';
 
 suite('TileGrid', () => {
   const numCols = 16;
@@ -27,6 +28,7 @@ suite('TileGrid', () => {
         assert.deepStrictEqual(tile, {
           col: x,
           row: y,
+          terrainKind: terrainKind.grass,
           textureId: expectedTexture,
         });
       });
@@ -52,6 +54,7 @@ suite('TileGrid', () => {
           expectedTextures.map((t) => ({
             col: bounds.x,
             row: bounds.y,
+            terrainKind: terrainKind.grass,
             textureId: t,
           })),
         );

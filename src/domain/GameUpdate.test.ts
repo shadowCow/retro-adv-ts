@@ -1,6 +1,6 @@
 import test, { suite } from 'node:test';
-import { createGameWorld, GameWorld } from './GameWorld';
-import { ControlAction, move } from './ControlActions';
+import { createEmptyGameWorld, GameWorld } from './GameWorld';
+import { ControlAction, move, togglePause } from './ControlActions';
 import { gameUpdate } from './GameUpdate';
 import assert from 'node:assert';
 import { room2Id } from './RoomDefinitions';
@@ -9,6 +9,39 @@ import { createGameEntity } from './GameEntity';
 import { createPlayerSpriteSheet } from './SpriteSheets';
 
 suite('GameUpdate', () => {
+  suite('togglePause', () => {
+    test('pause the game', () => {
+      const playerPosition = { x: 1, y: 1 };
+      const dt = 1;
+      const world = createTestWorld(playerPosition);
+      const actions: Array<ControlAction> = [
+        move({ dx: 0, dy: -1 }),
+        togglePause(),
+      ];
+
+      gameUpdate(dt, world, actions);
+
+      assert.deepStrictEqual(world.isPaused, true);
+      assert.deepStrictEqual(world.player.getPosition(), playerPosition);
+    });
+
+    test('unpause the game', () => {
+      const playerPosition = { x: 5, y: 5 };
+      const dt = 1;
+      const world = createTestWorld(playerPosition);
+      world.isPaused = true;
+      const actions: Array<ControlAction> = [
+        move({ dx: 0, dy: -1 }),
+        togglePause(),
+      ];
+
+      gameUpdate(dt, world, actions);
+
+      assert.deepStrictEqual(world.isPaused, false);
+      assert.deepStrictEqual(world.player.getPosition(), { x: 5, y: 2 });
+    });
+  });
+
   suite('room transition', () => {
     test('go to up room', () => {
       const playerPosition = { x: 7, y: 2.9 };
@@ -37,16 +70,16 @@ suite('GameUpdate', () => {
 
       gameUpdate(dt, world, actions);
 
-      assert.deepStrictEqual(world.player.getInventory()?.getItems(), [
-        collectible,
-      ]);
+      const inventory = world.player.getInventory();
+      const items = inventory === undefined ? [] : inventory.getItems();
       assert.deepStrictEqual(world.entities, []);
+      assert.deepStrictEqual(items, [collectible]);
     });
   });
 });
 
 function createTestWorld(playerPosition: Vec2): GameWorld {
-  const world = createGameWorld();
+  const world = createEmptyGameWorld();
   world.player.setPosition(playerPosition.x, playerPosition.y);
 
   const collectibleItem = createGameEntity(
