@@ -2,6 +2,8 @@ import { JSX, useReducer } from 'react';
 import classes from './OverlayView.module.css';
 import { GameWorld } from '../../domain/GameWorld';
 import { adt, assertNever } from '@cow-sunday/fp-ts';
+import { Inventory } from '../../domain/Inventory';
+import { GameEntity } from '../../domain/GameEntity';
 
 export function OverlayView(props: {
   isVisible: boolean;
@@ -14,20 +16,20 @@ export function OverlayView(props: {
   } else {
     return (
       <div className={classes.layout}>
-        <MenuView />
+        <MenuView world={props.world} />
       </div>
     );
   }
 }
 
-function MenuView(): JSX.Element {
+function MenuView(props: { world: GameWorld }): JSX.Element {
   const [menuState, menuDispatch] = useReducer(menuReducer, initialMenuState());
 
   switch (menuState.current) {
     case menuKind.main:
       return <MainMenuView menuDispatch={menuDispatch} />;
     case menuKind.inventory:
-      return <InventoryView menuDispatch={menuDispatch} />;
+      return <InventoryView menuDispatch={menuDispatch} world={props.world} />;
     default:
       assertNever(menuState.current);
   }
@@ -44,13 +46,39 @@ function MainMenuView(props: { menuDispatch: MenuDispatch }): JSX.Element {
   );
 }
 
-function InventoryView(props: { menuDispatch: MenuDispatch }): JSX.Element {
+function InventoryView(props: {
+  menuDispatch: MenuDispatch;
+  world: GameWorld;
+}): JSX.Element {
   return (
     <div className={classes.inventory}>
       <p>This is the inventory</p>
+      <div>
+        <InventoryItemsView inventory={props.world.player.getInventory()} />
+      </div>
       <button onClick={() => props.menuDispatch(toMain())}>Main Menu</button>
     </div>
   );
+}
+
+function InventoryItemsView(props: {
+  inventory: Inventory | undefined;
+}): JSX.Element {
+  if (props.inventory === undefined) {
+    return <></>;
+  }
+
+  return (
+    <>
+      {props.inventory.getItems().map((item) => (
+        <ItemView item={item} />
+      ))}
+    </>
+  );
+}
+
+function ItemView(props: { item: Readonly<GameEntity> }): JSX.Element {
+  return <div>an item</div>;
 }
 
 type MenuState = {
